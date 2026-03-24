@@ -1,0 +1,14 @@
+#include <stdint.h>
+
+// Khai bao cac mang UNK_ o day (ban copy data tu Ghidra hoac Python paste sang dang mang C)
+unsigned char UNK_00104070[2736] = {0x37, 0xba, 0x02, /*... paste full hex vao day ...*/};
+unsigned short UNK_00104bc0[16] = {0x0048, 0x0054, /*... paste full hex vao day ...*/};
+// ... (Khai bao tuong tu voi cac mang UNK_ con lai) ...
+
+// Copy nguyen xien ham cua Ghidra vao day, doi ten thanh simulate cho de goi
+long simulate(unsigned char* param_1) {
+    // ... [Paste noi dung cua FUN_001020f0 vao day] ...
+    // Luu y: sua kieu du lieu cac bien cho dung (vi du: uint -> uint32_t, byte -> uint8_t)
+    // Xoa phan khoi tao bVar1 = true; ... va vong lap while (iStack_14c == ...) ben ngoai di, 
+    // chi giu lai logic tinh toan loi~ (core logic).
+}
