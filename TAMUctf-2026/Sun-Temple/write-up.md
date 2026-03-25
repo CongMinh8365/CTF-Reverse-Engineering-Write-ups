@@ -27,8 +27,14 @@ sVar2 = strlen(param_1);
 Biến sVar2 lấy độ dài chuỗi input, sau đó đến State 0x2ac870a0:
 ```C
 if (iStack_d4 != 0x2ac870a0) break;
-// ...
-if (sVar2 != 0 && (sVar2 & 1) == 0) { 
-  iStack_d4 = 0x353895ac; // Đủ điều kiện thì cho đi tiếp
+  iStack_c0 = 1;
+  uStack_98 = 0;
+  uStack_c4 = 0;
+  iStack_d4 = 0x7685ffbe;
+  if (sVar2 != 0 && (sVar2 & 1) == 0) {
+      iStack_d4 = 0x353895ac;
 }
 ```
+Nó kiếm tra ta ko nhập vào chuỗi rỗng và chuỗi phải có độ dài chẵn mới cho đi tiếp => **Điều kiện 1: Độ dài chuỗi phải chẵn**
+
+Tiếp theo 
