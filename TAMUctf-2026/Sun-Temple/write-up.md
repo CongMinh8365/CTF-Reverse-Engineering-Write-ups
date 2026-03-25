@@ -19,7 +19,7 @@ Dễ thấy hàm này đã bị làm rối mã (Obfuscation) sử dụng vòng w
 
 Tóm lại ta hiểu được rằng input ta nhập vào sẽ đi qua chuỗi liên tiếp 2 hàm [FUN_00101640.c](./FUN_00101640.c), [FUN_001020f0.c](./FUN_001020f0.c) và phải thỏa mãn 2 điều kiện iVar1 khác 0, uVar4 <= 0x341c6e
 
-Bây giờ ta sẽ phân tích logic hàm [FUN_00101640.c](./FUN_00101640.c):
+### Bây giờ ta sẽ phân tích logic hàm [FUN_00101640.c](./FUN_00101640.c):
 Hàm này nhận 2 đầu vào param1 và param2 và ta đã biết param1 chính là chuỗi ta nhập vào. Ở ngay đầu chương trình có lệnh 
 ```C
 sVar2 = strlen(param_1);
@@ -102,7 +102,12 @@ Khối lệnh này giải thích toàn bộ logic của hàm:
 2. Lưu trữ ký tự thứ nhất bStack_cc vào mảng kết quả abStack_78 tại đúng vị trí do ký tự thứ hai uStack_58 chỉ định.
 3. Tăng biến đếm vòng lặp bStack_d7 lên 1.
 
+Chỉ còn lại một điều ta chưa rõ, đó là logic của hàm PTR_FUN_00106068() - thực chất đây chính là hàm [FUN_00103e00.c](./FUN_00103e00.c). Sử dụng AI phân tích nốt hàm này, ta biết rằng đây là hàm kiểm tra các kí tự nhập vào có phải kí tự Hex hay không. Nói cách khác, các kí tự trong input phải từ 0-9, a-f, A-F.
+
 Kết luận:
-1. Input hợp lệ phải là chuỗi Hex chẵn, tối đa 24 ký tự (vì biến đếm giới hạn ở 0xc tức 12 cặp).
+1. Input hợp lệ phải là chuỗi Hex, độ dài chẵn, tối đa 24 ký tự (vì biến đếm giới hạn ở 0xc tức 12 cặp).
 2. Cặp ký tự biểu diễn [ID][Vị trí].
 3. Mảng 16 bytes đầu hàm chính là mảng đánh dấu (Tracker). Điều này ép buộc ta không được trùng lặp ID và trùng lặp Vị trí.
+
+### Cuối cùng ta phân tích nốt hàm [FUN_001020f0.c](./FUN_001020f0.c):
+
