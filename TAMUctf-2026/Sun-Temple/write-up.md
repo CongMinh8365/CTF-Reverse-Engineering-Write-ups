@@ -135,7 +135,7 @@ if (0x341c6e < uVar4) {
 ```
 Rõ ràng ta chỉ cần quan tâm đến giá trị trả về của nó có <= 0x341c6e hay không là đủ => Chúng ta hoàn toàn không cần hiểu chính xác logic hàm [FUN_001020f0.c](./FUN_001020f0.c) ra sao!
 
-**Ý tưởng**: Bê nguyên đoạn mã giả C của hàm này do Ghidra sinh ra và các mảng data tĩnh vào một file sim.c rồi dùng GCC biên dịch nó thành một Thư viện động (sim.so), ta sẽ có ngay một hộp đen chỉ cần ném input vào, nó sẽ nhả kết quả ra để đem so sánh ngay lâp tức. Tiếp theo ta sử dụng thuật toán **Hill Climbing kết hợp Random Restart** để vét cạn toàn bộ trường hợp có thể của input, cụ thể như sau:
+**Ý tưởng**: Bê nguyên đoạn mã giả C của hàm này do Ghidra sinh ra và các mảng data tĩnh vào một file [sim.c](./sim.c) rồi dùng GCC biên dịch nó thành một Thư viện động (sim.so), ta sẽ có ngay một hộp đen chỉ cần ném input vào, nó sẽ nhả kết quả ra để đem so sánh ngay lâp tức. Tiếp theo ta sử dụng thuật toán **Hill Climbing kết hợp Random Restart** để vét cạn toàn bộ trường hợp có thể của input, cụ thể như sau:
 1. Khởi tạo ngẫu nhiên một mảng 12 ID vào 12 Vị trí.
 2. Liên tục Đột biến (Mutate) bằng cách: đổi vị trí 2 ID cho nhau, hoặc vứt 1 ID đang xài để bốc 1 ID mới chưa dùng vào thay thế.
 3. Ném qua Hộp đen chấm điểm. Nếu kết quả trả về nhỏ hơn hoặc bằng cấu hình cũ thì lấy đội hình mới và tiếp tục dò. Nếu cao hơn thì bỏ qua.
