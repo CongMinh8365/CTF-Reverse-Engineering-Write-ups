@@ -20,3 +20,15 @@ Dễ thấy hàm này đã bị làm rối mã (Obfuscation) sử dụng vòng w
 Tóm lại ta hiểu được rằng input ta nhập vào sẽ đi qua chuỗi liên tiếp 2 hàm [FUN_00101640.c](./FUN_00101640.c), [FUN_001020f0.c](./FUN_001020f0.c) và phải thỏa mãn 2 điều kiện iVar1 khác 0, uVar4 <= 0x341c6e
 
 Bây giờ ta sẽ phân tích logic hàm [FUN_00101640.c](./FUN_00101640.c):
+Hàm này nhận 2 đầu vào param1 và param2 và ta đã biết param1 chính là chuỗi ta nhập vào. Ở ngay đầu chương trình có lệnh 
+```C
+sVar2 = strlen(param_1);
+```
+Biến sVar2 lấy độ dài chuỗi input, sau đó đến State 0x2ac870a0:
+```C
+if (iStack_d4 != 0x2ac870a0) break;
+// ...
+if (sVar2 != 0 && (sVar2 & 1) == 0) { 
+  iStack_d4 = 0x353895ac; // Đủ điều kiện thì cho đi tiếp
+}
+```
