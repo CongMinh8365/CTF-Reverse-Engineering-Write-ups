@@ -35,6 +35,74 @@ if (iStack_d4 != 0x2ac870a0) break;
       iStack_d4 = 0x353895ac;
 }
 ```
-Nó kiếm tra ta ko nhập vào chuỗi rỗng và chuỗi phải có độ dài chẵn mới cho đi tiếp => **Điều kiện 1: Độ dài chuỗi phải chẵn**
+Nó kiếm tra ta ko nhập vào chuỗi rỗng và chuỗi phải có độ dài chẵn mới cho đi tiếp. Tiếp theo là 3 lệnh cấp phát bộ nhớ:
+```C
+memset(acStack_38,0,0x10);
+memset(acStack_88,0,0x10);
+memset(abStack_78,0,0x10);
+```
+Chương trình tạo ra 3 mảng với kích thước 0x10 (16 bytes) và khởi tạo toàn bộ bằng 0. Lần theo State Machine, ta tìm thấy nơi input bắt đầu được đọc tại State 0x4f3a6851:
+```C
+if (iStack_d4 != 0x4f3a6851) break;
+bStack_cc = (*(code *)PTR_FUN_00106068)(param_1[uStack_b0]);
+bStack_c6 = (*(code *)PTR_FUN_00106068)(param_1[uStack_b0 + 1]);
+uStack_c4 = 0;
+iStack_d4 = 0x7685ffbe;
+if (bStack_cc != 0xff && bStack_c6 != 0xff) {
+    iStack_d4 = 0x61400159;
+}
+```
+Ở đây, chương trình không đọc cả chuỗi mà đọc từng cặp 2 ký tự (param_1[uStack_b0] và [uStack_b0 + 1]). Hai ký tự này được đẩy qua hàm PTR_FUN_00106068 và lưu kết quả vào 2 biến là bStack_cc và bStack_c6. Nếu cả 2 hợp lệ (khác 0xff), luồng thực thi chuyển sang State 0x61400159. Theo dõi State 0x61400159, ta phát hiện mục đích của mảng 16 bytes acStack_38 được khởi tạo lúc đầu:
+```C
+if (iStack_d4 != 0x61400159) break;
+pcStack_50 = acStack_38 + bStack_cc;
+bStack_d5 = bStack_d7;
+bStack_d6 = bStack_cd;
+iStack_d4 = 0x9e4f8b0;
+if (acStack_38[bStack_cc] == '\0') {
+    iStack_d4 = 0x3e2be881;
+}
+```
+Chương trình dùng chính giá trị bStack_cc (ký tự thứ nhất của cặp) làm index để tra cứu vào mảng acStack_38. Nó kiểm tra xem ô nhớ này có bằng '\0' hay không. Nếu trống, nó mới cho đi tiếp sang State 0x3e2be881. Tương tự ở State 0x3e2be881, nó làm điều y hệt với ký tự thứ hai của cặp (bStack_c6) và mảng acStack_88:
+```C
+if (iStack_d4 != 0x3e2be881) break;
+uStack_58 = (ulong)bStack_c6;
+pcStack_60 = acStack_88 + uStack_58;
+bStack_d5 = bStack_d7;
+bStack_d6 = bStack_cd;
+iStack_d4 = 0x9e4f8b0;
+if (acStack_88[uStack_58] == '\0') {
+    iStack_d4 = 0x10e103d7;
+}
+```
+Vậy chuyện gì xảy ra nếu cả 2 ký tự đều lọt qua được cửa kiểm tra này? Ta nhảy tới State 0x10e103d7:
+```C
+if (iStack_d4 != 0x10e103d7) break;
+bStack_d5 = bStack_d7;
+bStack_d6 = bStack_d7;
+iStack_d4 = 0x9e4f8b0;
+if (bStack_d7 < 0xc) {
+    iStack_d4 = 0x4f7e2b3;
+}
+```
+Ở đây xuất hiện một biến đếm bStack_d7. Nó kiểm tra bStack_d7 < 0xc (nhỏ hơn 12). Nếu đúng, nó vào State chốt hạ 0x4f7e2b3:
+```C
+while (iStack_d4 == 0x4f7e2b3) {
+    *pcStack_50 = '\x01';
+    *pcStack_60 = '\x01';
+    abStack_78[uStack_58] = bStack_cc;
+    bStack_d6 = bStack_d7 + 1;
+    *pbStack_48 = bStack_d6;
+    iStack_d4 = 0x9e4f8b0;
+    bStack_d5 = bStack_d6;
+}
+```
+Khối lệnh này giải thích toàn bộ logic của hàm:
+1. Gán '\x01' vào ô nhớ trỏ bởi pcStack_50 và pcStack_60. Đây chính là hành động đánh dấu đã sử dụng. Nếu lần lặp sau nhập lại một ký tự giống hệt, giá trị tra cứu sẽ là 1 chứ không phải '\0', dẫn đến việc văng lỗi.
+2. Lưu trữ ký tự thứ nhất bStack_cc vào mảng kết quả abStack_78 tại đúng vị trí do ký tự thứ hai uStack_58 chỉ định.
+3. Tăng biến đếm vòng lặp bStack_d7 lên 1.
 
-Tiếp theo 
+Kết luận:
+1. Input hợp lệ phải là chuỗi Hex chẵn, tối đa 24 ký tự (vì biến đếm giới hạn ở 0xc tức 12 cặp).
+2. Cặp ký tự biểu diễn [ID][Vị trí].
+3. Mảng 16 bytes đầu hàm chính là mảng đánh dấu (Tracker). Điều này ép buộc ta không được trùng lặp ID và trùng lặp Vị trí.
