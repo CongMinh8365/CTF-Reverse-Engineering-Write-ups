@@ -102,12 +102,45 @@ Khối lệnh này giải thích toàn bộ logic của hàm:
 2. Lưu trữ ký tự thứ nhất bStack_cc vào mảng kết quả abStack_78 tại đúng vị trí do ký tự thứ hai uStack_58 chỉ định.
 3. Tăng biến đếm vòng lặp bStack_d7 lên 1.
 
-Chỉ còn lại một điều ta chưa rõ, đó là logic của hàm PTR_FUN_00106068() - thực chất đây chính là hàm [FUN_00103e00.c](./FUN_00103e00.c). Sử dụng AI phân tích nốt hàm này, ta biết rằng đây là hàm kiểm tra các kí tự nhập vào có phải kí tự Hex hay không. Nói cách khác, các kí tự trong input phải từ 0-9, a-f, A-F.
+Chỉ còn lại một điều ta chưa rõ, đó là logic của hàm PTR_FUN_00106068() - thực chất đây chính là hàm [FUN_00103e00.c](./FUN_00103e00.c). Sử dụng AI phân tích nốt hàm này, ta biết rằng đây là hàm kiểm tra các kí tự nhập vào có phải kí tự Hex hay không, nói cách khác, các kí tự trong input phải từ 0-9, a-f, A-F. Sau đó nó đổi các kí tự sang các số tương ứng từ 0 đến 15
 
 Kết luận:
 1. Input hợp lệ phải là chuỗi Hex, độ dài chẵn, tối đa 24 ký tự (vì biến đếm giới hạn ở 0xc tức 12 cặp).
-2. Cặp ký tự biểu diễn [ID][Vị trí].
-3. Mảng 16 bytes đầu hàm chính là mảng đánh dấu (Tracker). Điều này ép buộc ta không được trùng lặp ID và trùng lặp Vị trí.
+2. Output là một mảng các số nguyên (Byte Array) dài 32 bytes 
+3. Từng cặp ký tự biểu diễn [ID][Vị trí].
+4. Mảng 16 bytes đầu hàm chính là mảng đánh dấu (Tracker). Điều này ép buộc ta không được trùng lặp ID và trùng lặp Vị trí.
 
 ### Cuối cùng ta phân tích nốt hàm [FUN_001020f0.c](./FUN_001020f0.c):
+Sau khi input đi qua mảng kiểm tra định dạng, nó được truyền thẳng vào hàm FUN_001020f0. Tuy nhiên, ngay khi mở hàm này lên trong Ghidra, đập vào mắt ta là một cơn ác mộng Obfuscation với **Control Flow Flattening (CFF)**. Độ dài của hàm lên tới hàng trăm dòng, luồng thực thi bị băm nát và nhốt hoàn toàn trong một ma trận while(true) khổng lồ, được điều khiển bởi duy nhất một biến trạng thái iStack_14c:
+```C
+bVar1 = true;
+uStack_d4 = 0;
+lStack_78 = 0;
+iStack_14c = 0x35785628;
+code_r0x00103a87:
+  do {
+    while( true ) {
+      while( true ) {
+        // ... hàng chục tầng while(true) và if(iStack_14c == ...) lồng nhau ...
+```
+Đi lướt qua các state, ta thấy ngập tràn các phép toán bitwise (>> 4, & 0xf), tra cứu mảng tĩnh (**&UNK_00104070**,...), và các phép chia làm tròn số nguyên (/ 1000). Tỉ lệ obfuscation quá cao khiến việc trace từng dòng code bằng mắt thường là bất khả thi.
 
+Tuy nhiên hãy nhớ lại rằng trong hàm main:
+```C
+uVar4 = (*(code *)PTR_FUN_00106060)(auStack_335); 
+iStack_354 = 0x77269892;
+if (0x341c6e < uVar4) {
+    iStack_354 = 0x4a0c9460; 
+}
+```
+Rõ ràng ta chỉ cần quan tâm đến giá trị trả về của nó có <= 0x341c6e hay không là đủ => Chúng ta hoàn toàn không cần hiểu chính xác logic hàm [FUN_001020f0.c](./FUN_001020f0.c) ra sao!
+
+**Ý tưởng**: Bê nguyên đoạn mã giả C của hàm này do Ghidra sinh ra và các mảng data tĩnh vào một file sim.c rồi dùng GCC biên dịch nó thành một Thư viện động (sim.so), ta sẽ có ngay một hộp đen chỉ cần ném input vào, nó sẽ nhả kết quả ra để đem so sánh ngay lâp tức. Tiếp theo ta sử dụng thuật toán **Hill Climbing kết hợp Random Restart** để vét cạn toàn bộ trường hợp có thể của input, cụ thể như sau:
+1. Khởi tạo ngẫu nhiên một mảng 12 ID vào 12 Vị trí.
+2. Liên tục Đột biến (Mutate) bằng cách: đổi vị trí 2 ID cho nhau, hoặc vứt 1 ID đang xài để bốc 1 ID mới chưa dùng vào thay thế.
+3. Ném qua Hộp đen chấm điểm. Nếu kết quả trả về nhỏ hơn hoặc bằng cấu hình cũ thì lấy đội hình mới và tiếp tục dò. Nếu cao hơn thì bỏ qua.
+4. Nếu dò liên tục 1000 bước mà điểm không giảm (bị kẹt ở cực tiểu địa phương), thuật toán tự động Restart (quay lại Bước 1) với một mảng ngẫu nhiên mới.
+
+Áp dụng ý tưởng trên ta có code tìm kiếm input thuận lợi: [solve.py](./solve.py). Có input rồi ta sẽ ném lên server để lấy về flag: [solve2.py](./solve2.py)
+
+**FLAG: gigem{pr41s3_b3_th3_E7ERN4L_bl4z1n6_5UN}**
