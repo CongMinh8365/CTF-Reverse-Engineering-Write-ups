@@ -241,10 +241,10 @@ if (pvVar12 != (HANDLE)0x0) {
 Ta biết rằng 1 kí tự nào đó mà tác giả gõ từ bàn phím đã XOR với file 20 gốc để ra file 20 bị mã hóa này. Do XOR từng byte độc lập nên rõ ràng ta chỉ cần biết được đúng 1 byte của file gốc là ta sẽ tìm lại được kí tự kia (Tính chất của phép XOR: Kitu ^ Byte_gốc = Byte_MH <=> Kitu = Byte_gốc ^ Byte_MH). Đương nhiên là ta biết. Hãy nhớ rằng 1 file exe của Window luôn bắt đầu bằng 2 byte MZ 
 => Lấy byte M (0x4d) XOR với byte đầu tiên của file mã hóa (trong ảnh là 0x30) được 0x7d => Tra bảng ASCII, kí tự tác giả đã nhập là '}'
 
-Lấy kí tự này XOR với toàn bộ file bị mã hóa, ta thu được file gốc:
+Lấy kí tự này XOR với toàn bộ file bị mã hóa, ta thu được file 20 gốc:
 
 <img width="1363" height="613" alt="image" src="https://github.com/user-attachments/assets/617e47c5-9a03-4bdf-bb3e-17649d4ee72a" />
 
-Lặp lại quá trình trên 21 lần để đến file số 0, ta thu được chuỗi kí tự mà tác giả đã nhập: **}Ta3N_5i_aT4DCR{megig**
+Lặp lại quá trình trên 21 lần để đến file số 0, ta thu được chuỗi kí tự mà tác giả đã nhập: **}Ta3N_5i_aT4DCR{megig**.
 Đảo ngược lại, ta thu được FLAG: **gigem{RCD4Ta_i5_N3aT}**
 
