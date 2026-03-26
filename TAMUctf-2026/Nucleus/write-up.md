@@ -194,4 +194,57 @@ Flow của chương trình:
 
 Rõ ràng file này không có mã hóa hay giải mã gì cả, nhiệm vụ của nó chỉ là "đẻ" ra file đời tiếp theo. Từ tên file **nucleus21.exe** có thể suy luận rằng đây là file đời thứ 21 của file gốc **nucleus0.exe** rồi. 
 
-Tiếp tục phân tích hàm FUN_1400010d0:
+Tiếp tục phân tích hàm [FUN_1400010d0.c](./FUN_1400010d0.c):
+```C
+DVar8 = GetModuleFileNameA((HMODULE)0x0, local_138, 0x104); 
+// ...
+BVar9 = ReadFile(pvVar12, lpBuffer, DVar8, lpNumberOfBytesRead, (LPOVERLAPPED)0x0);
+```
+Chương trình gọi API để lấy đường dẫn của chính nó đang chạy (local_138). Sau đó, nó tự mở file và đọc toàn bộ nội dung nhị phân (raw bytes) đổ vào vùng nhớ lpBuffer. Lúc này, lpBuffer chứa chính nó.
+
+```C
+iVar10 = getchar();
+// ... (bỏ qua vòng lặp xử lý phím Enter)
+bVar17 = (byte)iVar10;
+```
+Ngay khi đọc file xong, luồng thực thi dừng lại tại getchar(). Nó chờ người dùng nhập một phím bất kỳ và lưu giá trị (dạng byte) vào bVar17. 
+
+```C
+do {
+  *pbVar13 = *pbVar13 ^ bVar17;
+  pbVar13 = pbVar13 + 1;
+  uVar14 = uVar14 - 1;
+} while (uVar14 != 0);
+```
+Chương trình sử dụng một con trỏ pbVar13 duyệt qua toàn bộ vùng nhớ lpBuffer. Nó lấy từng byte của file gốc XOR trực tiếp với cái byte ta nhập vào ở biến bVar17 và ghi đè lại vị trí cũ. Cấu trúc file ban đầu giờ đã bị mã hóa.
+
+```C
+pvVar12 = BeginUpdateResourceA(param_1, 0); 
+if (pvVar12 != (HANDLE)0x0) {
+  UpdateResourceA(pvVar12, (LPCSTR)0xa, (LPCSTR)0x65, 0, lpBuffer, DVar8);
+// ...
+```
+Đống dữ liệu bị mã hóa đi về đâu? Đoạn code trên cho ta thấy nó gọi API UpdateResourceA để nhét toàn bộ lpBuffer vào mục Resource của file bản sao (param_1 - ví dụ nucleus22.exe truyền từ hàm main sang). Để ý rằng 0xa là định danh của RT_RCDATA (Raw Data) và 0x65 chính là ID 101.
+
+Đến đây, logic chương trình đã sáng tỏ:
+1. Giả sử hiện tại là file i, nó sẽ chạy và tự copy ra rồi đổi tên thành file i+1
+2. File i đọc nội dung của chính nó, chờ ta nhập 1 kí tự, rồi XOR toàn bộ nội dung với kí tự đó
+3. File i sau khi bị mã hóa sẽ chui vào mục RCDATA 101 của file i+1
+4. Quá trình này lặp lại đến file số 21 hay chính là file **nucleus21.exe** hiện tại
+
+=> Điều ta cần làm bây giờ là bóc từ file 21 ngược về file 0.
+
+Đầu tiên, ta cần mổ bụng file nucleus21.exe ra để lấy file 20 đã bị mã hóa. Để làm điều đó ta sẽ dùng tool **Resource Hacker** để lấy phần RCDATA của file nucleus21.exe:
+
+<img width="785" height="433" alt="image" src="https://github.com/user-attachments/assets/369cf1d2-7485-4b8a-82a7-c7e56ee0f27e" />
+
+Ta biết rằng 1 kí tự nào đó mà tác giả gõ từ bàn phím đã XOR với file 20 gốc để ra file 20 bị mã hóa này. Do XOR từng byte độc lập nên rõ ràng ta chỉ cần biết được đúng 1 byte của file gốc là ta sẽ tìm lại được kí tự kia (Tính chất của phép XOR: Kitu ^ Byte_gốc = Byte_MH <=> Kitu = Byte_gốc ^ Byte_MH). Đương nhiên là ta biết. Hãy nhớ rằng 1 file exe của Window luôn bắt đầu bằng 2 byte MZ 
+=> Lấy byte M (0x4d) XOR với byte đầu tiên của file mã hóa (trong ảnh là 0x30) được 0x7d => Tra bảng ASCII, kí tự tác giả đã nhập là '}'
+
+Lấy kí tự này XOR với toàn bộ file bị mã hóa, ta thu được file gốc:
+
+<img width="1363" height="613" alt="image" src="https://github.com/user-attachments/assets/617e47c5-9a03-4bdf-bb3e-17649d4ee72a" />
+
+Lặp lại quá trình trên 21 lần để đến file số 0, ta thu được chuỗi kí tự mà tác giả đã nhập: **}Ta3N_5i_aT4DCR{megig**
+Đảo ngược lại, ta thu được FLAG: **gigem{RCD4Ta_i5_N3aT}**
+
