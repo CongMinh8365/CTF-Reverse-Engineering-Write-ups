@@ -133,9 +133,65 @@ _get_initial_narrow_environment();
         return uVar6 & 0xffffffff;
       }
 ```
-Ngay sau khi chương trình chuẩn bị xong các tham số dòng lệnh argc, argv, nó lập tức gọi hàm FUN_140001360(). Kết quả trả về của hàm này được đẩy xuống quá trình dọn dẹp (_cexit). Hàm FUN_140001d0c() thì cũng chỉ là 
+Ngay sau khi chương trình chuẩn bị xong các tham số dòng lệnh argc, argv, nó lập tức gọi hàm FUN_140001360(). Kết quả trả về của hàm này được đẩy xuống quá trình dọn dẹp (_cexit). Mặt khác phân tích hàm FUN_140001d0c() ta thấy nó chính là hàm __scrt_is_managed_app() trong mã nguồn Microsoft C Runtime (CRT). Nhiệm vụ của nó là kiểm tra xem file thực thi này có phải là ứng dụng được viết bằng .NET (C#, F#, VB.NET) hay không, do đó ta không cần quan tâm. 
 
 <img width="769" height="361" alt="image" src="https://github.com/user-attachments/assets/643e0caa-fa9b-429a-beb5-7c8b0b3124ca" />
 
-Từ đó ta rút ra kết luận: Hàm FUN_140001360() mới chính là hàm thực thi chính của chương trình!
 
+Từ những phân tích trên ta rút ra kết luận: Hàm FUN_140001360() mới chính là hàm thực thi chính của chương trình!
+
+### Phân tích hàm FUN_140001360():
+```C
+
+/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+
+undefined8 FUN_140001360(void)
+
+{
+  byte bVar1;
+  DWORD DVar2;
+  byte *pbVar3;
+  byte *lpFilename;
+  byte *_Src;
+  undefined8 in_R9;
+  undefined1 auStack_258 [32];
+  byte local_238 [272];
+  byte local_128 [272];
+  ulonglong local_18;
+  
+  local_18 = DAT_140005000 ^ (ulonglong)auStack_258;
+  lpFilename = local_128;
+  _Src = (byte *)0x104;
+  DVar2 = GetModuleFileNameA((HMODULE)0x0,(LPSTR)lpFilename,0x104);
+  if (DVar2 != 0) {
+    _Src = local_128;
+    strcpy_s((char *)local_238,0x104,(char *)_Src);
+    pbVar3 = local_238 + (int)(DVar2 - 5);
+    bVar1 = *pbVar3;
+    lpFilename = (byte *)(ulonglong)bVar1;
+    if ((byte)(bVar1 - 0x30) < 10) {
+      if (bVar1 == 0x39) {
+        FUN_140001070(pbVar3,(longlong)(int)(0x104 - (DVar2 - 5)),"10.exe",in_R9);
+      }
+      else {
+        *pbVar3 = bVar1 + 1;
+      }
+      _Src = (byte *)0x0;
+      lpFilename = local_238;
+      CopyFileA((LPCSTR)local_128,(LPCSTR)lpFilename,0);
+    }
+  }
+  FUN_1400010d0((LPCSTR)local_238,lpFilename,_Src,in_R9);
+  return 0;
+}
+```
+Flow của chương trình:
+1. Gọi GetModuleFileNameA với module là 0x0: Nó đang lấy đường dẫn tuyệt đối của chính file đang chạy (ví dụ ...\nucleus21.exe) và lưu vào local_128.
+2. Dòng pbVar3 = local_238 + (int)(DVar2 - 5);: Biến DVar2 là độ dài chuỗi đường dẫn. Lùi lại 5 ký tự từ cuối lên chính là vị trí của ký tự nằm ngay trước chuỗi .exe. Với nucleus21.exe, ký tự này là '1'.
+3. Kiểm tra xem ký tự đó có phải là số không (< 10). Nếu là '9', nó đổi thành 10.exe. Nếu là số khác, nó cộng thêm 1 (*pbVar3 = bVar1 + 1).
+4. Cuối cùng, nó gọi CopyFileA để nhân bản chính nó ra một file mới với cái tên vừa được tăng số (ví dụ: đang chạy 21 thì copy ra file 22).
+5. Kết thúc hàm main, nó truyền tên file mới sinh ra đó vào hàm FUN_1400010d0.
+
+Rõ ràng file này không có mã hóa hay giải mã gì cả, nhiệm vụ của nó chỉ là "đẻ" ra file đời tiếp theo. Từ tên file **nucleus21.exe** có thể suy luận rằng đây là file đời thứ 21 của file gốc **nucleus0.exe** rồi. 
+
+Tiếp tục phân tích hàm FUN_1400010d0:
