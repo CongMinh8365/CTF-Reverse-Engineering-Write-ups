@@ -111,7 +111,8 @@ Khi thực hiện đúng kỹ thuật này (Dùng Python trong GDB bypass strtou
 <img width="1366" height="520" alt="image" src="https://github.com/user-attachments/assets/0d7c1799-7f28-4be6-9872-f5b422d6fcc4" />
 <img width="1363" height="237" alt="image" src="https://github.com/user-attachments/assets/eb4b6ae3-73e6-4e5e-9335-96dd1a75efcf" />
 
-Tại điểm dừng Hardware Breakpoint của Case 4, ta thu được đoạn lệnh Assembly sau: [assembly.asm](./assembly.asm)
+Tại điểm dừng Hardware Breakpoint của Case 4, ta thu được đoạn lệnh Assembly sau: [assembly.asm](./assembly.asm).
+
 Đọc luồng Assembly, ta thấy:
 1. Input chỉ có thể là a-z, 0-9, _
 2. Có 4 hằng số cứng lớn được nạp vào r10 (0x35bcb75507c270f7, 0x841e959c29c8f1e7...) làm Target Bytes.
