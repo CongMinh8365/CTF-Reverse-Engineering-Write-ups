@@ -109,3 +109,14 @@ Khi thực hiện đúng kỹ thuật này (Dùng Python trong GDB bypass strtou
 <img width="1317" height="98" alt="image" src="https://github.com/user-attachments/assets/ff805753-e8ad-405c-ae59-34bfd24c33da" />
 <img width="1355" height="134" alt="image" src="https://github.com/user-attachments/assets/de46acf0-d14a-421f-85c7-13e2dd30e4f6" />
 <img width="1366" height="520" alt="image" src="https://github.com/user-attachments/assets/0d7c1799-7f28-4be6-9872-f5b422d6fcc4" />
+<img width="1363" height="237" alt="image" src="https://github.com/user-attachments/assets/eb4b6ae3-73e6-4e5e-9335-96dd1a75efcf" />
+
+Tại điểm dừng Hardware Breakpoint của Case 4, ta thu được đoạn lệnh Assembly sau: [assembly.asm](./assembly.asm)
+Đọc luồng Assembly, ta thấy:
+1. Input chỉ có thể là a-z, 0-9, _
+2. Có 4 hằng số cứng lớn được nạp vào r10 (0x35bcb75507c270f7, 0x841e959c29c8f1e7...) làm Target Bytes.
+3. Input được cộng, XOR với các thanh ghi trạng thái (r9d, ebx) rồi đối chiếu từng byte với các khối Target kia.
+
+Mọi thứ đã quá rõ ràng. Ta dựng lại công thức toán học từ assembly và viết Python script đảo ngược: [solve.py](./solve.py)
+
+Chạy script trên ta thu được flag: **gigem{this_will_be_the_flag_for_challenge_7}**
