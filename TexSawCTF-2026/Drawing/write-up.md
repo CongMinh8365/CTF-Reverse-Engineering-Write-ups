@@ -14,4 +14,4 @@ Tiến hành tải **Ryujinx** về máy, giải nén và cài đặt, mở lên
 
 <img width="1277" height="730" alt="image" src="https://github.com/user-attachments/assets/daa008d1-f748-48b2-bb85-b035eb7b56bb" />
 
-FLAG: **texsaw{switch96959d49370}**
+## FLAG: **texsaw{switch96959d49370}**
