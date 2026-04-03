@@ -95,8 +95,11 @@ void FUN_0040126e(void)
 ```
 Hàm này sẽ in ra kết quả là: **[SUCCESS] Flag: texsaw{maybe_the_real_fake_flag_was_the_friends_we_made}**
 Đây là fake flag. Thử tiếp vài hàm nữa, ta thấy rằng sẽ có 3 fake flag lặp đi lặp lại:
+
 **[SUCCESS] Flag: texsaw{fake_flag_do_not_submit}**
+
 **[SUCCESS] Flag: texsaw{maybe_the_real_fake_flag_was_the_friends_we_made}**
+
 **[SUCCESS] Flag: texsaw{n0t_th3_fl4g_lol}**
 
 Dựa vào tên bài là **ragebait**, ta hiểu rằng trong 1009 hàm này chỉ có duy nhất 1 hàm là hàm check flag thật sự, còn lại là hàm rác và in ra fake flag. Và nếu ta để ý kĩ thì sẽ phát hiện ra rằng tất cả các hàm rác này đều có cùng 1 cấu trúc, đó là luôn chứa 1 mảng giá trị Hex, sau đó mảng này được ném vào vòng lặp để tính toán, cuối cùng lệnh printf in ra 1 trong 3 fake flag này. 
