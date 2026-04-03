@@ -101,7 +101,7 @@ undefined8 main(void)
 }
 ```
 
-Ta thấy logic khá rõ ràng: Ban đầu người chơi được cho 1 mảng 8 số 0. Mỗi lượt người chơi chọn 1 số từ 1-8 tương ứng với 8 case của vòng lặp switch, từ đó thay đổi giá trị của mảng, mục tiêu là cần làm cho mảng này có các giá trị lần lượt bằng 2, 6, -4, 6, 0, 4, -3, 1. Tiếp theo chọn số 0 thì 8 giá trị mảng và 8 giá trị đích sẽ được đưa vào hàm turn_in(). Kiểm tra hàm này, ta thấy nó làm nhiệm vụ so sánh 2 mảng này với nhau, nếu đúng thì sẽ in ra flag:
+Ta thấy logic khá rõ ràng: Ban đầu người chơi được cho 1 mảng 8 số 0. Mỗi lượt người chơi chọn 1 số từ 1-8 tương ứng với 8 case của vòng lặp switch, tương ứng với 1 kiểu biến đổi, từ đó thay đổi giá trị của mảng. Mục tiêu là cần làm cho mảng này có các giá trị lần lượt bằng 2, 6, -4, 6, 0, 4, -3, 1. Tiếp theo chọn số 0 thì 8 giá trị mảng và 8 giá trị đích sẽ được đưa vào hàm turn_in(). Kiểm tra hàm này, ta thấy nó làm nhiệm vụ so sánh 2 mảng này với nhau, nếu đúng thì sẽ in ra flag:
 ```C
 bool turn_in(void *param_1,void *param_2)
 
