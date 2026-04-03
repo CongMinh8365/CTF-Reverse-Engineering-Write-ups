@@ -7,6 +7,7 @@ Mở Ghidra lên và decompile file này, ta tìm đến hàm thực thi chính:
 Ta thấy hàm này cho phép nhập vào 1 chuỗi kí tự, chuỗi này cần có độ dài 32 byte (0x20 = 32), sau đó chương trình cắt lấy 9 kí tự đầu tiên của chuỗi và đưa vào hàm **FUN_00401216()**, kết quả trả về lưu vào biến uVar1. Sau đó chương trình lấy uVar1 % 0x3f1 (tức 1009) ra 1 con số (từ 0 đến 1008) làm index cho con trỏ hàm **&PTR_FUN_0044e080** và nhảy vào đấy thực hiện tiếp.
 
 Ta kiểm tra hàm **FUN_00401216()**:
+
 <img width="690" height="336" alt="image" src="https://github.com/user-attachments/assets/a1319dc4-92b9-4b0d-8b88-9da30d3146fb" />
 
 Ta thấy có hai hằng số khá kì lạ 0x811c9dc5 và 0x1000193. Thử tra cứu, ta biết đây chính là thuật toán băm FNV-1a bản 32-bit. Tiếp theo thử ấn vào con trỏ hàm **&PTR_FUN_0044e080**:
@@ -200,6 +201,7 @@ for (local_78 = 0; local_78 < sVar1; local_78 = local_78 + 1) {
 }
 ```
 Đây chính là logic kiểm tra chính. Phép toán local_78 & 3 tương đương với index % 4. Điều này có nghĩa là chuỗi 32 ký tự của chúng ta được chia thành 4 nhóm xen kẽ:
+
 Nhóm 0: Ký tự 0, 4, 8, 12, 16, 20, 24, 28
 
 Nhóm 1: Ký tự 1, 5, 9, 13, 17, 21, 25, 29
@@ -209,6 +211,7 @@ Nhóm 2: Ký tự 2, 6, 10, 14, 18, 22, 26, 30
 Nhóm 3: Ký tự 3, 7, 11, 15, 19, 23, 27, 31
 
 Với từng nhóm hàm này áp dụng công thức: Giá trị mới = Giá trị cũ * 131 + Kí tự hiện tại (0x83 = 131)
+
 Sau đó thu được 4 giá trị và đem so sánh tương ứng với 4 hằng số 0x112996d9ae479fd, 0xefb70b2a601818, 0x11c799cc5063ac2, 0x1100d35eadc1177. Nếu đúng hết thì sẽ in ra flag: **printf("\x1b[0;32m[SUCCESS] Flag: %s\x1b[0m\n",param_1)**
 
 Mọi thứ đã rõ ràng, giờ ta chỉ cần làm ngược lại công thức trên để tìm từng kí tự, sau đó ghép lại lần lượt theo nhóm 0 -> nhóm 1 -> nhóm 2 -> nhóm 3 là ta sẽ thu được input đúng.
@@ -245,6 +248,7 @@ for i, s in enumerate(decoded_lanes):
     print(f"Chuỗi {i}: {s}")
 ```
 Chạy script trên ta thu được 4 chuỗi: taV_4m06, ewhUkE_r, x{Y_3_4y, sVdM_sn}
+
 => Ghép lại: Input = texsaw{VVhYd_U_M4k3_mE_s0_4n6ry}
 
 Ném input này vào chương trình để thu được flag:
