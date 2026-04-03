@@ -11,6 +11,7 @@ Ta kiểm tra hàm **FUN_00401216()**:
 <img width="690" height="336" alt="image" src="https://github.com/user-attachments/assets/a1319dc4-92b9-4b0d-8b88-9da30d3146fb" />
 
 Ta thấy có hai hằng số khá kì lạ 0x811c9dc5 và 0x1000193. Thử tra cứu, ta biết đây chính là thuật toán băm FNV-1a bản 32-bit. Tiếp theo thử ấn vào con trỏ hàm **&PTR_FUN_0044e080**:
+
 <img width="574" height="368" alt="image" src="https://github.com/user-attachments/assets/0f563322-7443-4863-bfc1-17cc05459c4e" />
 <img width="568" height="369" alt="image" src="https://github.com/user-attachments/assets/7c2dee5b-c29d-434c-8776-dc930248ced4" />
 
